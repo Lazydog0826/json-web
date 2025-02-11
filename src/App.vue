@@ -29,6 +29,16 @@
           </template>
           <template #default>下载</template>
         </a-button>
+        <a-button
+          type="primary"
+          @click="saveGlobalVariable"
+          v-show="settings.language == 'json'"
+        >
+          <template #icon>
+            <icon-code />
+          </template>
+          <template #default>保存为全局变量</template>
+        </a-button>
       </a-space>
     </a-layout-header>
 
@@ -171,6 +181,20 @@ const download = () => {
   link.remove();
 };
 
+// 保存为全局变量
+const saveGlobalVariable = () => {
+  const json = editor.getValue();
+  let i = 1;
+  while (true) {
+    if (window[`temp${i}`] == null) {
+      window[`temp${i}`] = JSON.parse(json);
+      console.log(`temp${i}`, window[`temp${i}`]);
+      break;
+    }
+    i++;
+  }
+};
+
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
   if (editorContainer.value) {
@@ -183,26 +207,6 @@ onMounted(() => {
         fontSize: settings.fontSize,
         automaticLayout: true,
       });
-
-      // editor.addAction({
-      //   id: "change-settings",
-      //   label: "设置",
-      //   contextMenuGroupId: "navigation",
-      //   contextMenuOrder: 0,
-      //   run: function (editor) {
-      //     settings_visible.value = true;
-      //   },
-      // });
-
-      // editor.addAction({
-      //   id: "share-json",
-      //   label: "分享",
-      //   contextMenuGroupId: "navigation",
-      //   contextMenuOrder: 0.1,
-      //   run: function (editor) {
-      //     share_model_visible.value = true;
-      //   },
-      // });
 
       editor.addAction({
         id: "fold-all",
