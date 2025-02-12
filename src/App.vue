@@ -29,6 +29,12 @@
           </template>
           <template #default>下载</template>
         </a-button>
+        <a-button type="primary" @click="openNewPage">
+          <template #icon>
+            <icon-share-internal />
+          </template>
+          <template #default>打开新页面</template>
+        </a-button>
         <a-button
           type="primary"
           @click="saveGlobalVariable"
@@ -195,6 +201,11 @@ const saveGlobalVariable = () => {
   }
 };
 
+// 打开新页面
+const openNewPage = () => {
+  window.open(window.location.origin);
+};
+
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
   if (editorContainer.value) {
@@ -259,6 +270,10 @@ onMounted(() => {
           .catch((_) => {
             Message.error("请求失败");
           });
+      } else {
+        navigator.clipboard.readText().then((text) => {
+          editor.setValue(text);
+        });
       }
     });
   }
