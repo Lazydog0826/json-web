@@ -45,6 +45,12 @@
           </template>
           <template #default>保存为全局变量</template>
         </a-button>
+        <a-button type="primary" @click="openFile">
+          <template #icon>
+            <icon-drive-file />
+          </template>
+          <template #default>打开新页面</template>
+        </a-button>
       </a-space>
     </a-layout-header>
 
@@ -79,6 +85,14 @@
       </a-space>
     </template>
   </a-modal>
+
+  <input
+    type="file"
+    id="fileInput"
+    style="display: none"
+    accept=".txt,.json,.xml,.js,.ts,.yaml,.yml,.css,.html"
+    @change="handleFileChange"
+  />
 </template>
 
 <script setup>
@@ -204,6 +218,31 @@ const saveGlobalVariable = () => {
 // 打开新页面
 const openNewPage = () => {
   window.open(window.location.origin);
+};
+
+// 触发文件选择事件
+const openFile = () => {
+  const fileInput = document.getElementById("fileInput");
+  fileInput.click();
+};
+
+// 文件选择事件
+const handleFileChange = () => {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function (e) {
+      const content = e.target.result;
+      editor.setValue(content);
+      editor.trigger("anything", "editor.action.formatDocument");
+    };
+
+    reader.onerror = function () {
+      Message.error("读取文件时出错");
+    };
+  }
 };
 
 onMounted(() => {
