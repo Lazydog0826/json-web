@@ -49,7 +49,7 @@
           <template #icon>
             <icon-drive-file />
           </template>
-          <template #default>打开新页面</template>
+          <template #default>打开文件</template>
         </a-button>
       </a-space>
     </a-layout-header>
