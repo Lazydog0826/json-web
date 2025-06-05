@@ -46,6 +46,7 @@
           </template>
           <template #default>已保存数据</template>
         </a-button>
+        <a-tag v-if="settings.currentDataName">{{ settings.currentDataName }}</a-tag>
       </a-space>
     </a-layout-header>
     <a-layout-content>
@@ -373,7 +374,6 @@ const tableDelete = (record) => {
 
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
-  settings.currentDataName = "";
   if (editorContainer.value) {
     loader.init().then((monacoInstance) => {
       editor = monacoInstance.editor.create(editorContainer.value, {
