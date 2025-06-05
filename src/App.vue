@@ -277,9 +277,9 @@ const saveHandle = () => {
 // 按键触发保存
 const keySave = () => {
   if (settings.currentDataName) {
-    save_model_visible.value = true;
-  } else {
     saveHandle();
+  } else {
+    save_model_visible.value = true;
   }
 }
 
@@ -373,6 +373,7 @@ const tableDelete = (record) => {
 
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
+  settings.currentDataName = "";
   if (editorContainer.value) {
     loader.init().then((monacoInstance) => {
       editor = monacoInstance.editor.create(editorContainer.value, {
@@ -383,7 +384,6 @@ onMounted(() => {
         fontSize: settings.fontSize,
         automaticLayout: true,
       });
-
       editor.addAction({
         id: "fold-all",
         label: "折叠所有",
@@ -393,7 +393,6 @@ onMounted(() => {
           editor.getAction("editor.foldAll").run();
         },
       });
-
       editor.addAction({
         id: "unfold-all",
         label: "展开所有",
