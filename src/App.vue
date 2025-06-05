@@ -137,11 +137,6 @@ const languageDataArr = [
     fileExtensionName: "yaml"
   },
   {
-    language: "yml",
-    title: "YML",
-    fileExtensionName: "yml"
-  },
-  {
     language: "json",
     title: "JSON",
     fileExtensionName: ""
