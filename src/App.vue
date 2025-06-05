@@ -2,7 +2,11 @@
   <a-layout class="layout">
     <a-layout-header class="header">
       <a-space>
-        <a-select style="width: 200px" v-model="settings.language" allow-search @change="languageChange">
+        <a-select style="width: 150px"
+                  v-model="settings.language"
+                  allow-search
+                  @change="languageChange"
+                  size="small">
           <a-option
               v-for="item in languageDataArr"
               :key="item.language"
@@ -10,42 +14,48 @@
             {{ item.title }}
           </a-option>
         </a-select>
-        <a-button type="primary" @click="share_model_visible = true">
-          <template #icon>
-            <icon-link/>
-          </template>
-          <template #default>分享</template>
-        </a-button>
-        <a-button type="primary" @click="download">
-          <template #icon>
-            <icon-download/>
-          </template>
-          <template #default>下载</template>
-        </a-button>
-        <a-button type="primary" @click="openNewPage">
-          <template #icon>
-            <icon-share-internal/>
-          </template>
-          <template #default>打开新页面</template>
-        </a-button>
-        <a-button type="primary" @click="saveGlobalVariable" v-if="settings.language === 'json'">
-          <template #icon>
-            <icon-code/>
-          </template>
-          <template #default>保存为全局变量</template>
-        </a-button>
-        <a-button type="primary" @click="openFile">
-          <template #icon>
-            <icon-drive-file/>
-          </template>
-          <template #default>打开文件</template>
-        </a-button>
-        <a-button type="primary" @click="()=>(data_model_visible=true)">
-          <template #icon>
-            <icon-list/>
-          </template>
-          <template #default>已保存数据</template>
-        </a-button>
+        <a-tooltip content="分享">
+          <a-button size="small" type="primary" @click="share_model_visible = true">
+            <template #icon>
+              <icon-link/>
+            </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip content="下载">
+          <a-button size="small" type="primary" @click="download">
+            <template #icon>
+              <icon-download/>
+            </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip content="打开新页面">
+          <a-button size="small" type="primary" @click="openNewPage">
+            <template #icon>
+              <icon-share-internal/>
+            </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip content="创建为变量" v-if="settings.language === 'json'">
+          <a-button size="small" type="primary" @click="saveGlobalVariable">
+            <template #icon>
+              <icon-code/>
+            </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip content="打开文件">
+          <a-button size="small" type="primary" @click="openFile">
+            <template #icon>
+              <icon-drive-file/>
+            </template>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip content="数据表格">
+          <a-button size="small" type="primary" @click="()=>(data_model_visible=true)">
+            <template #icon>
+              <icon-list/>
+            </template>
+          </a-button>
+        </a-tooltip>
         <a-tag v-if="pageData.currentDataName">{{ pageData.currentDataName }}</a-tag>
       </a-space>
     </a-layout-header>
