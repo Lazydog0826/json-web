@@ -2,52 +2,41 @@
   <a-layout class="layout">
     <a-layout-header class="header">
       <a-space>
-        <a-select
-          style="width: 200px"
-          v-model="settings.language"
-          allow-search
-          @change="languageChange"
-        >
-          <a-option value="plaintext">PlainText</a-option>
-          <a-option value="javascript">JavaScript</a-option>
-          <a-option value="typescript">TypeScript</a-option>
-          <a-option value="css">CSS</a-option>
-          <a-option value="html">HTML</a-option>
-          <a-option value="json">JSON</a-option>
-          <a-option value="xml">XML</a-option>
-          <a-option value="yaml">YAML</a-option>
+        <a-select style="width: 200px" v-model="settings.language" allow-search @change="languageChange">
+          <a-option
+              v-for="item in languageDataArr"
+              :key="item.language"
+              :value="item.language">
+            {{ item.title }}
+          </a-option>
         </a-select>
         <a-button type="primary" @click="share_model_visible = true">
           <template #icon>
-            <icon-link />
+            <icon-link/>
           </template>
           <template #default>分享</template>
         </a-button>
         <a-button type="primary" @click="download">
           <template #icon>
-            <icon-download />
+            <icon-download/>
           </template>
           <template #default>下载</template>
         </a-button>
         <a-button type="primary" @click="openNewPage">
           <template #icon>
-            <icon-share-internal />
+            <icon-share-internal/>
           </template>
           <template #default>打开新页面</template>
         </a-button>
-        <a-button
-          type="primary"
-          @click="saveGlobalVariable"
-          v-show="settings.language == 'json'"
-        >
+        <a-button type="primary" @click="saveGlobalVariable" v-if="settings.language === 'json'">
           <template #icon>
-            <icon-code />
+            <icon-code/>
           </template>
           <template #default>保存为全局变量</template>
         </a-button>
         <a-button type="primary" @click="openFile">
           <template #icon>
-            <icon-drive-file />
+            <icon-drive-file/>
           </template>
           <template #default>打开文件</template>
         </a-button>
@@ -65,7 +54,7 @@
       <a-spin :loading="loading" style="width: 100%">
         <a-space direction="vertical" style="width: 100%">
           <a-alert>过期时间 : 小时</a-alert>
-          <a-input-number v-model="hour" :min="1" :max="10000" />
+          <a-input-number v-model="hour" :min="1" :max="10000"/>
           <a-link v-show="link !== ''" :href="link">{{ link }}</a-link>
           <a-link v-show="link !== ''" @click="copy">Copy</a-link>
         </a-space>
@@ -73,10 +62,7 @@
     </div>
     <template #footer>
       <a-space>
-        <a-button
-          :loading="loading"
-          @click="() => (share_model_visible = false)"
-        >
+        <a-button :loading="loading" @click="() => (share_model_visible = false)">
           取消
         </a-button>
         <a-button :loading="loading" type="primary" @click="shareHandle">
@@ -87,26 +73,75 @@
   </a-modal>
 
   <input
-    type="file"
-    id="fileInput"
-    style="display: none"
-    accept=".txt,.json,.xml,.js,.ts,.yaml,.yml,.css,.html"
-    @change="handleFileChange"
+      type="file"
+      id="fileInput"
+      style="display: none"
+      accept=".txt,.json,.xml,.js,.ts,.yaml,.yml,.css,.html"
+      @change="handleFileChange"
   />
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, reactive } from "vue";
+import {onMounted, onUnmounted, ref, reactive} from "vue";
 import * as monaco from "monaco-editor";
 import axios from "axios";
-import { Message } from "@arco-design/web-vue";
+import {Message} from "@arco-design/web-vue";
 import useClipboard from "vue-clipboard3";
 import loader from "@monaco-editor/loader";
 
-loader.config({ monaco });
-loader.config({ "vs/nls": { availableLanguages: { "*": "zh-cn" } } });
 
-const { toClipboard } = useClipboard();
+const languageDataArr = [
+  {
+    language: "yaml",
+    title: "YAML",
+    fileExtensionName: "yaml"
+  },
+  {
+    language: "yml",
+    title: "YML",
+    fileExtensionName: "yml"
+  },
+  {
+    language: "json",
+    title: "JSON",
+    fileExtensionName: ""
+  },
+  {
+    language: "plaintext",
+    title: "Text",
+    fileExtensionName: "txt"
+  },
+  {
+    language: "javascript",
+    title: "JavaScript",
+    fileExtensionName: "js"
+  },
+  {
+    language: "typescript",
+    title: "TypeScript",
+    fileExtensionName: "ts"
+  },
+  {
+    language: "css",
+    title: "CSS",
+    fileExtensionName: "css"
+  },
+  {
+    language: "html",
+    title: "HTML",
+    fileExtensionName: "html"
+  },
+  {
+    language: "xml",
+    title: "XML",
+    fileExtensionName: "xml"
+  }
+]
+
+loader.config({monaco});
+loader.config({"vs/nls": {availableLanguages: {"*": "zh-cn"}}});
+
+const {toClipboard} = useClipboard();
 
 const editorContainer = ref(null);
 let editor = null;
@@ -135,16 +170,14 @@ const shareHandle = () => {
       hour: hour.value,
       settings,
     },
-  })
-    .then((r) => {
-      loading.value = false;
-      const origin = window.location.origin;
-      link.value = `${origin}?key=${r.data.key}`;
-    })
-    .catch((e) => {
-      loading.value = false;
-      Message.error("请求失败");
-    });
+  }).then((r) => {
+    loading.value = false;
+    const origin = window.location.origin;
+    link.value = `${origin}?key=${r.data.key}`;
+  }).catch(() => {
+    loading.value = false;
+    Message.error("请求失败");
+  });
 };
 
 // 设置
@@ -157,7 +190,7 @@ const settingsHandle = (isCache) => {
 };
 
 // 语言切换事件
-const languageChange = (language) => {
+const languageChange = () => {
   settingsHandle(true);
 };
 
@@ -167,36 +200,21 @@ const copy = () => {
     Message.error("先生成链接");
   } else {
     toClipboard(link.value)
-      .then((_) => {
-        Message.success("复制成功");
-      })
-      .catch((_) => {
-        Message.error("复制失败");
-      });
+        .then((_) => {
+          Message.success("复制成功");
+        })
+        .catch((_) => {
+          Message.error("复制失败");
+        });
   }
 };
 
 // 下载
 const download = () => {
-  const blob = new Blob([editor.getValue()], { type: "text/plain" });
+  const blob = new Blob([editor.getValue()], {type: "text/plain"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "download.";
-
-  switch (settings.language) {
-    case "plaintext":
-      link.download += "txt";
-      break;
-    case "javascript":
-      link.download += "js";
-      break;
-    case "typescript":
-      link.download += "ts";
-      break;
-    default:
-      link.download += settings.language;
-      break;
-  }
+  link.download = "download." + languageDataArr.find(x => x.language === settings.language).fileExtensionName;
   link.click();
   link.remove();
 };
@@ -231,14 +249,16 @@ const handleFileChange = () => {
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
   if (file) {
+    const fileExtend = file.name.split(".")[1];
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = function (e) {
       const content = e.target.result;
       editor.setValue(content);
+      settings.language = languageDataArr.find(x => x.fileExtensionName === fileExtend).language;
+      settingsHandle(false);
       editor.trigger("anything", "editor.action.formatDocument");
     };
-
     reader.onerror = function () {
       Message.error("读取文件时出错");
     };
@@ -296,19 +316,17 @@ onMounted(() => {
           params: {
             key,
           },
-        })
-          .then((r) => {
-            if (r.data.key === "") {
-              Message.error("链接已过期");
-            } else {
-              Object.assign(settings, r.data.settings);
-              settingsHandle(false);
-              editor.setValue(r.data.text);
-            }
-          })
-          .catch((_) => {
-            Message.error("请求失败");
-          });
+        }).then((r) => {
+          if (r.data.key === "") {
+            Message.error("链接已过期");
+          } else {
+            Object.assign(settings, r.data.settings);
+            settingsHandle(false);
+            editor.setValue(r.data.text);
+          }
+        }).catch((_) => {
+          Message.error("请求失败");
+        });
       } else {
         navigator.clipboard.readText().then((text) => {
           editor.setValue(text);
@@ -325,11 +343,12 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .layout {
   height: 100%;
   width: 100%;
   position: fixed;
+
   .header {
     height: 48px;
     line-height: 48px;
