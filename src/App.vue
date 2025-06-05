@@ -80,7 +80,7 @@
   <a-modal v-model:visible="save_model_visible" :mask-closable="false">
     <template #title>保存</template>
     <div>
-      <a-input placeholder="内容名称" v-model="pageData.currentDataName" allow-clear/>
+      <a-input placeholder="内容名称" v-model="pageData.currentDataName" allow-clear @press-enter="saveHandle"/>
     </div>
     <template #footer>
       <a-space>
