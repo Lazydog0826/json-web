@@ -239,7 +239,7 @@ const shareHandle = () => {
   }).then((r) => {
     loading.value = false;
     const origin = window.location.origin;
-    link.value = `${origin}?key=${r.data.key}`;
+    link.value = `${origin}/?key=${r.data.key}`;
     toClipboard(link.value)
         .then((_) => {
           Message.success("链接已复制到粘贴板");
