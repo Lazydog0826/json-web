@@ -46,7 +46,7 @@
           </template>
           <template #default>已保存数据</template>
         </a-button>
-        <a-tag v-if="settings.currentDataName">{{ settings.currentDataName }}</a-tag>
+        <a-tag v-if="pageData.currentDataName">{{ pageData.currentDataName }}</a-tag>
       </a-space>
     </a-layout-header>
     <a-layout-content>
@@ -80,7 +80,7 @@
   <a-modal v-model:visible="save_model_visible" :mask-closable="false">
     <template #title>保存</template>
     <div>
-      <a-input placeholder="内容名称" v-model="settings.currentDataName" allow-clear/>
+      <a-input placeholder="内容名称" v-model="pageData.currentDataName" allow-clear/>
     </div>
     <template #footer>
       <a-space>
@@ -97,7 +97,7 @@
   <a-modal v-model:visible="data_model_visible" :mask-closable="true" width="50%">
     <template #title>数据</template>
     <a-space direction="vertical" style="width: 100%">
-      <a-input placeholder="搜索" v-model="settings.search" allow-clear/>
+      <a-input placeholder="搜索" v-model="pageData.search" allow-clear/>
       <a-table :columns="columns" :data="tableData" style="width: 100%" :pagination="false">
         <template #optional="{record}">
           <a-space>
@@ -180,7 +180,7 @@ const languageDataArr = [
 loader.config({monaco});
 loader.config({"vs/nls": {availableLanguages: {"*": "zh-cn"}}});
 const {toClipboard} = useClipboard();
-const editorContainer = ref(null);
+const editorContainer = ref();
 let editor = null;
 const share_model_visible = ref(false);
 const save_model_visible = ref(false);
@@ -188,7 +188,9 @@ const data_model_visible = ref(false);
 const settings = reactive({
   language: "json",
   fontFamily: "Courier New",
-  fontSize: 16,
+  fontSize: 16
+});
+const pageData = reactive({
   currentDataName: "",
   search: ""
 });
@@ -221,10 +223,10 @@ const columns = [
 ];
 
 const tableData = computed(() => {
-  if (settings.search === "") {
+  if (pageData.search === "") {
     return saveDataArr.value;
   }
-  return saveDataArr.value.filter(x => x.name.indexOf(settings.search) > -1);
+  return saveDataArr.value.filter(x => x.name.indexOf(pageData.search) > -1);
 });
 
 // 分享
@@ -259,13 +261,13 @@ const shareHandle = () => {
 // 保存内容
 const saveHandle = () => {
   const text = editor.getValue();
-  const data = saveDataArr.value.find(x => x.name === settings.currentDataName);
-  if (data) {
-    data.content = text;
-    data.language = settings.language;
+  const temData = saveDataArr.value.find(x => x.name === pageData.currentDataName);
+  if (temData) {
+    temData.content = text;
+    temData.language = settings.language;
   } else {
     saveDataArr.value.push({
-      name: settings.currentDataName,
+      name: pageData.currentDataName,
       content: text,
       language: settings.language
     });
@@ -277,7 +279,7 @@ const saveHandle = () => {
 
 // 按键触发保存
 const keySave = () => {
-  if (settings.currentDataName) {
+  if (pageData.currentDataName) {
     saveHandle();
   } else {
     save_model_visible.value = true;
