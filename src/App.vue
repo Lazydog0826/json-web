@@ -40,9 +40,14 @@
           </template>
           <template #default>打开文件</template>
         </a-button>
+        <a-button type="primary" @click="()=>(data_model_visible=true)">
+          <template #icon>
+            <icon-list/>
+          </template>
+          <template #default>已保存数据</template>
+        </a-button>
       </a-space>
     </a-layout-header>
-
     <a-layout-content>
       <div class="editor-container" ref="editorContainer"></div>
     </a-layout-content>
@@ -61,13 +66,48 @@
     </div>
     <template #footer>
       <a-space>
-        <a-button :loading="loading" @click="() => (share_model_visible = false)">
+        <a-button :loading="loading" @click="()=>(share_model_visible=false)">
           取消
         </a-button>
         <a-button :loading="loading" type="primary" @click="shareHandle">
           生成链接
         </a-button>
       </a-space>
+    </template>
+  </a-modal>
+
+  <a-modal v-model:visible="save_model_visible" :mask-closable="false">
+    <template #title>保存</template>
+    <div>
+      <a-input placeholder="内容名称" v-model="settings.currentDataName" allow-clear/>
+    </div>
+    <template #footer>
+      <a-space>
+        <a-button @click="()=>(save_model_visible=false)">
+          取消
+        </a-button>
+        <a-button type="primary" @click="saveHandle">
+          保存
+        </a-button>
+      </a-space>
+    </template>
+  </a-modal>
+
+  <a-modal v-model:visible="data_model_visible" :mask-closable="true" width="50%">
+    <template #title>数据</template>
+    <a-space direction="vertical" style="width: 100%">
+      <a-input placeholder="搜索" v-model="settings.search" allow-clear/>
+      <a-table :columns="columns" :data="tableData" style="width: 100%" :pagination="false">
+        <template #optional="{record}">
+          <a-space>
+            <a-button type="primary" @click="tableView(record)">查看</a-button>
+            <a-button type="primary" status="danger" @click="tableDelete(record)">删除</a-button>
+          </a-space>
+        </template>
+      </a-table>
+    </a-space>
+    <template #footer>
+      <span></span>
     </template>
   </a-modal>
 
@@ -81,7 +121,7 @@
 </template>
 
 <script setup>
-import {onMounted, onUnmounted, ref, reactive} from "vue";
+import {onMounted, onUnmounted, ref, reactive, computed} from "vue";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 import {Message} from "@arco-design/web-vue";
@@ -135,27 +175,56 @@ const languageDataArr = [
     title: "XML",
     fileExtensionName: "xml"
   }
-]
-
+];
 loader.config({monaco});
 loader.config({"vs/nls": {availableLanguages: {"*": "zh-cn"}}});
-
 const {toClipboard} = useClipboard();
-
 const editorContainer = ref(null);
 let editor = null;
-
 const share_model_visible = ref(false);
-
+const save_model_visible = ref(false);
+const data_model_visible = ref(false);
 const settings = reactive({
   language: "json",
   fontFamily: "Courier New",
   fontSize: 16,
+  currentDataName: "",
+  search: ""
 });
-
 const hour = ref(1);
 const link = ref("");
 const loading = ref(false);
+const saveDataArr = ref([]);
+const columns = [
+  {
+    title: '名称',
+    dataIndex: 'name',
+    width: 100
+  },
+  {
+    title: '语言',
+    dataIndex: 'language',
+    width: 100
+  },
+  {
+    title: '内容',
+    dataIndex: 'content',
+    ellipsis: true,
+    tooltip: true
+  },
+  {
+    title: '操作',
+    slotName: 'optional',
+    width: 160
+  }
+];
+
+const tableData = computed(() => {
+  if (settings.search === "") {
+    return saveDataArr.value;
+  }
+  return saveDataArr.value.filter(x => x.name.indexOf(settings.search) > -1);
+});
 
 // 分享
 const shareHandle = () => {
@@ -185,6 +254,34 @@ const shareHandle = () => {
     Message.error("请求失败");
   });
 };
+
+// 保存内容
+const saveHandle = () => {
+  const text = editor.getValue();
+  const data = saveDataArr.value.find(x => x.name === settings.currentDataName);
+  if (data) {
+    data.content = text;
+    data.language = settings.language;
+  } else {
+    saveDataArr.value.push({
+      name: settings.currentDataName,
+      content: text,
+      language: settings.language
+    });
+  }
+  window.localStorage.setItem("SaveData", JSON.stringify(saveDataArr.value));
+  save_model_visible.value = false;
+  Message.success("保存成功");
+}
+
+// 按键触发保存
+const keySave = () => {
+  if (settings.currentDataName === "") {
+    save_model_visible.value = true;
+  } else {
+    saveHandle();
+  }
+}
 
 // 设置
 const settingsHandle = (isCache) => {
@@ -256,6 +353,24 @@ const handleFileChange = () => {
   }
 };
 
+// 表格查看事件
+const tableView = (record) => {
+  settings.language = record.language;
+  editor.setValue(record.content);
+  settingsHandle(false);
+  data_model_visible.value = false;
+}
+
+// 表格删除事件
+const tableDelete = (record) => {
+  const index = saveDataArr.value.findIndex(x => x.name === record.name);
+  if (index > -1) {
+    saveDataArr.value.splice(index, 1);
+    window.localStorage.setItem("SaveData", JSON.stringify(saveDataArr.value));
+    Message.success("保存成功");
+  }
+}
+
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
   if (editorContainer.value) {
@@ -325,12 +440,29 @@ onMounted(() => {
       }
     });
   }
+
+  // 添加ctrl+s监听
+  window.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault();
+      keySave();
+    }
+  });
+
+  // 加载保存的数据
+  const saveDataArrStr = window.localStorage.getItem("SaveData");
+  if (saveDataArrStr) {
+    try {
+      saveDataArr.value = JSON.parse(saveDataArrStr);
+    } catch {
+      saveDataArr.value = [];
+      console.log("加载缓存失败")
+    }
+  }
 });
 
 onUnmounted(() => {
-  if (editor.value) {
-    editor.value.dispose();
-  }
+  if (editor.value) editor.value.dispose();
 });
 </script>
 
