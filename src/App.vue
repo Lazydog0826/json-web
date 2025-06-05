@@ -199,7 +199,7 @@ const columns = [
   {
     title: '名称',
     dataIndex: 'name',
-    width: 100
+    width: 150
   },
   {
     title: '语言',
@@ -276,7 +276,7 @@ const saveHandle = () => {
 
 // 按键触发保存
 const keySave = () => {
-  if (settings.currentDataName === "") {
+  if (settings.currentDataName) {
     save_model_visible.value = true;
   } else {
     saveHandle();
