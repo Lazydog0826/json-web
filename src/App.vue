@@ -126,7 +126,7 @@
       type="file"
       id="fileInput"
       style="display: none"
-      accept=".txt,.json,.xml,.js,.ts,.yaml,.yml,.css,.html"
+      accept=".txt,.json,.xml,.js,.ts,.yaml,.css,.html"
       @change="handleFileChange"
   />
 </template>
