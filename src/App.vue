@@ -55,8 +55,7 @@
         <a-space direction="vertical" style="width: 100%">
           <a-alert>过期时间 : 小时</a-alert>
           <a-input-number v-model="hour" :min="1" :max="10000"/>
-          <a-link v-show="link !== ''" :href="link">{{ link }}</a-link>
-          <a-link v-show="link !== ''" @click="copy">Copy</a-link>
+          <a-link v-show="link" :href="link" icon>{{ link }}</a-link>
         </a-space>
       </a-spin>
     </div>
@@ -174,6 +173,13 @@ const shareHandle = () => {
     loading.value = false;
     const origin = window.location.origin;
     link.value = `${origin}?key=${r.data.key}`;
+    toClipboard(link.value)
+        .then((_) => {
+          Message.success("链接已复制到粘贴板");
+        })
+        .catch((_) => {
+          Message.error("复制失败");
+        });
   }).catch(() => {
     loading.value = false;
     Message.error("请求失败");
@@ -192,21 +198,6 @@ const settingsHandle = (isCache) => {
 // 语言切换事件
 const languageChange = () => {
   settingsHandle(true);
-};
-
-// 复制
-const copy = () => {
-  if (link.value === "") {
-    Message.error("先生成链接");
-  } else {
-    toClipboard(link.value)
-        .then((_) => {
-          Message.success("复制成功");
-        })
-        .catch((_) => {
-          Message.error("复制失败");
-        });
-  }
 };
 
 // 下载
