@@ -56,6 +56,13 @@
             </template>
           </a-button>
         </a-tooltip>
+        <a-tooltip content="复制">
+          <a-button size="small" type="primary" @click="copyContent">
+            <template #icon>
+              <icon-copy/>
+            </template>
+          </a-button>
+        </a-tooltip>
         <a-tag v-if="pageData.currentDataName">{{ pageData.currentDataName }}</a-tag>
       </a-space>
     </a-layout-header>
@@ -138,7 +145,6 @@ import axios from "axios";
 import {Message} from "@arco-design/web-vue";
 import useClipboard from "vue-clipboard3";
 import loader from "@monaco-editor/loader";
-
 
 const languageDataArr = [
   {
@@ -250,13 +256,11 @@ const shareHandle = () => {
     loading.value = false;
     const origin = window.location.origin;
     link.value = `${origin}/?key=${r.data.key}`;
-    toClipboard(link.value)
-        .then((_) => {
-          Message.success("链接已复制到粘贴板");
-        })
-        .catch((_) => {
-          Message.error("复制失败");
-        });
+    toClipboard(link.value).then(() => {
+      Message.success("链接已复制到粘贴板");
+    }).catch(() => {
+      Message.error("复制失败");
+    });
   }).catch(() => {
     loading.value = false;
     Message.error("请求失败");
@@ -378,6 +382,16 @@ const tableDelete = (record) => {
     Message.success("保存成功");
   }
 }
+
+// 复制内容
+const copyContent = () => {
+  const text = editor.getValue();
+  toClipboard(text).then(() => {
+    Message.success("内容已复制到粘贴板");
+  }).catch(() => {
+    Message.error("复制失败");
+  });
+};
 
 onMounted(() => {
   document.body.setAttribute("arco-theme", "dark");
