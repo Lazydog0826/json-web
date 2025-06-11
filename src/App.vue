@@ -155,7 +155,7 @@ const languageDataArr = [
   {
     language: "json",
     title: "JSON",
-    fileExtensionName: ""
+    fileExtensionName: "json"
   },
   {
     language: "plaintext",
